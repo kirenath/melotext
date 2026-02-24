@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Mic, Copy, Globe, MessageSquare, Check, Clock, Upload, LinkIcon, AlertTriangle } from "lucide-react"
+import { Mic, Copy, Globe, MessageSquare, Check, Clock, Upload, LinkIcon, AlertTriangle, Download } from "lucide-react"
 import { FileUploader } from "@/components/upload/FileUploader"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
@@ -26,6 +26,8 @@ export default function TranscriptionTool() {
   const [copied, setCopied] = useState(false)
   const [translationError, setTranslationError] = useState<string | null>(null)
   const [transcriptionError, setTranscriptionError] = useState<string | null>(null)
+  const [srtContent, setSrtContent] = useState<string>("")
+  const [vttContent, setVttContent] = useState<string>("")
   const [darkMode, setDarkMode] = useState(false)
 
   // 暗色模式还没做orzzzzz
@@ -63,6 +65,8 @@ export default function TranscriptionTool() {
     setTranscriptionError(null)
     setShowTranslation(false)
     setTranscriptionTime(null)
+    setSrtContent("")
+    setVttContent("")
     setTranslationTime(null)
 
     try {
@@ -105,6 +109,8 @@ export default function TranscriptionTool() {
       }
 
       setOutput(data.text || "无转录内容")
+      if (data.srt) setSrtContent(data.srt)
+      if (data.vtt) setVttContent(data.vtt)
       const endTime = Date.now()
       setTranscriptionTime((endTime - startTime) / 1000)
     } catch (error: any) {
@@ -193,6 +199,18 @@ export default function TranscriptionTool() {
     } catch (err) {
       console.error("复制失败:", err)
     }
+  }
+
+  const downloadSubtitle = (content: string, format: "srt" | "vtt") => {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `subtitle.${format}`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   const handleFileUpload = (url: string) => {
@@ -401,6 +419,28 @@ export default function TranscriptionTool() {
                       </>
                     )}
                   </Button>
+                  {srtContent && (
+                    <Button
+                      onClick={() => downloadSubtitle(srtContent, "srt")}
+                      variant="secondary"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      SRT
+                    </Button>
+                  )}
+                  {vttContent && (
+                    <Button
+                      onClick={() => downloadSubtitle(vttContent, "vtt")}
+                      variant="secondary"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      VTT
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
