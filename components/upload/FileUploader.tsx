@@ -9,7 +9,7 @@ interface FileUploaderProps {
   maxSize?: number; // in MB
 }
 
-export function FileUploader({ onFileUpload, maxSize = 300 }: FileUploaderProps) {
+export function FileUploader({ onFileUpload, maxSize = 100 }: FileUploaderProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);

@@ -93,11 +93,32 @@ export async function transcribeAudio(audioUrl: string, apiKey: string, speechMo
       console.log("⚠️ 没有提供 words 逐词时间戳")
     }
 
+    // 获取 SRT 和 VTT 字幕
+    console.log("📝 正在获取字幕文件...")
+
+    const [srtRes, vttRes] = await Promise.all([
+      fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}/srt`, {
+        headers: { authorization: apiKey },
+      }),
+      fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}/vtt`, {
+        headers: { authorization: apiKey },
+      }),
+    ])
+
+    const srtContent = srtRes.ok ? await srtRes.text() : ""
+    const vttContent = vttRes.ok ? await vttRes.text() : ""
+
+    if (srtContent) console.log("✅ SRT 字幕获取成功")
+    if (vttContent) console.log("✅ VTT 字幕获取成功")
+
     // 最终返回结果
     return {
       success: true,
       text: result.text || "无转录内容",
       duration: result.audio_duration,
+      transcriptId,
+      srt: srtContent,
+      vtt: vttContent,
     }
   } catch (error) {
     console.error("❗ Transcription function error:", error)
