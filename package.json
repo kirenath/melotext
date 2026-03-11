@@ -1,14 +1,14 @@
 {
   "name": "melotext",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
-  "description": "Melody2Text - Mögest du inmitten des wortüberfluteten Weltenlärms einen klaren, dir ganz eigenen Flecken sprachlicher Heimat entdecken. ",
+  "description": "Melotext - AI 驱动的音频转录、翻译与 SRT 字幕生成工具 | Mögest du inmitten des wortüberfluteten Weltenlärms einen klaren, dir ganz eigenen Flecken sprachlicher Heimat entdecken.",
   "author": "Kirenath with Elias <kirenath@tuta.io>",
-  "license": "MIT",
-  "homepage": "https://melotext.app",
+  "license": "AGPL-3.0",
+  "homepage": "https://melotext.kirenath.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Rooode-Viiis/melotext"
+    "url": "https://github.com/kirenath/melotext"
   },
   "keywords": [
     "transcription",
