@@ -3,7 +3,8 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Mic, Copy, Globe, MessageSquare, Check, Clock, Upload, LinkIcon, AlertTriangle, Download } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Mic, Copy, Globe, MessageSquare, Check, Clock, Upload, LinkIcon, AlertTriangle, Download, Eye, LogOut } from "lucide-react"
 import { FileUploader } from "@/components/upload/FileUploader"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
@@ -29,6 +30,28 @@ export default function TranscriptionTool() {
   const [srtContent, setSrtContent] = useState<string>("")
   const [vttContent, setVttContent] = useState<string>("")
   const [darkMode, setDarkMode] = useState(false)
+  const [isPreviewMode, setIsPreviewMode] = useState(false)
+  const router = useRouter()
+
+  // 检测演示模式
+  useEffect(() => {
+    const cookies = document.cookie.split('; ')
+    const modeCookie = cookies.find(c => c.startsWith('melotext_mode='))
+    if (modeCookie?.split('=')[1] === 'preview') {
+      setIsPreviewMode(true)
+    }
+  }, [])
+
+  // 退出演示模式
+  const handleExitPreview = async () => {
+    try {
+      await fetch('/api/auth', { method: 'DELETE' })
+      router.push('/gate')
+      router.refresh()
+    } catch (err) {
+      console.error('退出演示模式失败:', err)
+    }
+  }
 
   // 暗色模式还没做orzzzzz
   useEffect(() => {
@@ -239,6 +262,24 @@ export default function TranscriptionTool() {
         <div className="absolute -bottom-32 -left-32 w-64 h-64 rounded-full bg-purple-300 opacity-10 blur-3xl" />
 
         <div className="relative z-10">
+          {/* 演示模式横幅 */}
+          {isPreviewMode && (
+            <div className="mb-4 flex items-center justify-between px-4 py-2.5 rounded-xl bg-amber-50/80 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-700/30 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-300">
+                <Eye className="h-4 w-4" />
+                <span className="text-sm font-medium">演示模式</span>
+                <span className="text-xs text-amber-600/70 dark:text-amber-400/70">功能受限，数据为模拟内容</span>
+              </div>
+              <button
+                onClick={handleExitPreview}
+                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300 bg-amber-100/60 dark:bg-amber-800/30 hover:bg-amber-200/80 dark:hover:bg-amber-700/40 rounded-lg transition-colors cursor-pointer border border-amber-200/50 dark:border-amber-600/30"
+              >
+                <LogOut className="h-3 w-3" />
+                退出演示
+              </button>
+            </div>
+          )}
+
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">AI音频转文字&翻译工具</h1>
           <p className="text-gray-600 dark:text-gray-300 text-sm mb-8">
             Powered by AssemblyAI
@@ -269,7 +310,15 @@ export default function TranscriptionTool() {
 
               {inputMethod === "upload" ? (
                 <div className="bg-white/10 dark:bg-gray-800/10 backdrop-blur-md p-4 rounded-xl border border-white/20 dark:border-gray-700/20">
-                  <FileUploader onFileUpload={handleFileUpload} />
+                  {isPreviewMode ? (
+                    <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                      <Upload className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-sm">演示模式下不支持文件上传</p>
+                      <p className="text-xs mt-1 text-gray-400">请切换到「输入链接」模式，输入任意链接即可体验转录流程</p>
+                    </div>
+                  ) : (
+                    <FileUploader onFileUpload={handleFileUpload} />
+                  )}
                   {audioUrl && (
                     <div className="mt-4">
                       <p className="text-xs text-gray-600 dark:text-gray-300 mb-1">已上传文件链接:</p>

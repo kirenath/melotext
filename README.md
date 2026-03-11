@@ -13,6 +13,7 @@
 - 📝 **SRT 字幕生成** — 从转录结果直接导出 SRT 字幕文件
 - ☁️ **云端存储** — Cloudflare R2 对象存储，管理音频文件
 - 🔑 **访问控制** — Access Key 中间件，保护你的实例
+- 👀 **演示模式** — Preview Key 一键体验完整界面，API 返回模拟数据，不消耗真实资源
 - 🐳 **Docker 部署** — 一行命令启动，开箱即用
 
 ## 🛠️ 技术栈
@@ -71,6 +72,7 @@ cp MUST_READ_ME.env.template .env.local
 | `R2_ENDPOINT`         | R2 S3 兼容端点                                          |
 | `R2_PUBLIC_DOMAIN`    | R2 公共访问域名                                         |
 | `ACCESS_KEY`          | 应用访问密钥 (自定义)                                   |
+| `PREVIEW_KEY`         | 演示模式密钥 (可选，默认 `preview`)                     |
 
 ### 4. 启动开发服务器
 
@@ -79,6 +81,17 @@ pnpm dev
 ```
 
 访问 [http://localhost:3000](http://localhost:3000)，首次访问需输入你设置的 `ACCESS_KEY`。
+
+### 演示模式
+
+在登录页点击 **「演示模式」** 按钮或输入 `PREVIEW_KEY` 即可进入演示模式：
+
+- ✅ 浏览完整 UI 界面
+- ✅ 体验转录 / 翻译流程（返回模拟数据）
+- ❌ 不消耗 API 额度，不调用真实模型
+- ❌ 文件上传 / 删除不可用
+
+页面顶部会显示「演示模式」横幅，点击「退出演示」即可返回登录页。
 
 ## 🐳 Docker 部署
 
@@ -108,10 +121,10 @@ melotext/
 │   │   ├── translate/     # 文本翻译
 │   │   ├── r2-upload/     # R2 上传
 │   │   └── r2-delete/     # R2 删除
-│   ├── gate/              # 访问密钥输入页
+│   ├── gate/              # 访问密钥输入页 + 演示模式入口
 │   └── page.tsx           # 主页面
 ├── components/            # UI 组件
-├── middleware.ts           # Access Key 中间件
+├── middleware.ts           # 认证中间件（访问控制 + 演示模式拦截）
 ├── Dockerfile
 └── MUST_READ_ME.env.template
 ```

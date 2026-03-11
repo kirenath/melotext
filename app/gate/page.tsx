@@ -7,7 +7,9 @@ export default function GatePage() {
   const [key, setKey] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const [shake, setShake] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e?: FormEvent) => {
@@ -48,6 +50,26 @@ export default function GatePage() {
     if (e.key === 'Enter') {
       e.preventDefault()
       handleSubmit()
+    }
+  }
+
+  const handleDemoMode = async () => {
+    setDemoLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/auth?preview=true')
+      const data = await res.json()
+
+      if (res.ok && data.success) {
+        router.push('/')
+        router.refresh()
+      } else {
+        setError('进入演示模式失败，请重试')
+      }
+    } catch {
+      setError('网络错误，请重试')
+    } finally {
+      setDemoLoading(false)
     }
   }
 
@@ -105,7 +127,7 @@ export default function GatePage() {
               </div>
               <input
                 id="access-key-input"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 value={key}
                 onChange={(e) => {
                   setKey(e.target.value)
@@ -117,6 +139,26 @@ export default function GatePage() {
                 autoComplete="off"
                 className="gate-input"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="gate-eye-btn"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
             </div>
 
             {error && (
@@ -151,6 +193,41 @@ export default function GatePage() {
               )}
             </button>
           </form>
+
+          {/* 分隔线 + 演示模式按钮 */}
+          <div className="gate-divider">
+            <span className="gate-divider-line" />
+            <span className="gate-divider-text">或</span>
+            <span className="gate-divider-line" />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDemoMode}
+            disabled={demoLoading}
+            className="gate-demo-button"
+          >
+            {demoLoading ? (
+              <div className="gate-spinner gate-spinner-dark" />
+            ) : (
+              <>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                演示模式
+              </>
+            )}
+          </button>
 
           {/* 底部信息 - 与主页 footer 一致 */}
           <div className="gate-footer">
@@ -343,6 +420,30 @@ export default function GatePage() {
           box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
         }
 
+        .gate-input {
+          padding-right: 2.5rem;
+        }
+
+        .gate-eye-btn {
+          position: absolute;
+          right: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          color: #9ca3af;
+          background: none;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          z-index: 2;
+          transition: color 0.15s ease;
+        }
+
+        .gate-eye-btn:hover {
+          color: #6b7280;
+        }
+
         .gate-error {
           display: flex;
           align-items: center;
@@ -405,6 +506,66 @@ export default function GatePage() {
 
         @keyframes spin {
           to { transform: rotate(360deg); }
+        }
+
+        /* 分隔线 */
+        .gate-divider {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          margin: 1.25rem 0;
+        }
+
+        .gate-divider-line {
+          flex: 1;
+          height: 1px;
+          background: rgba(0, 0, 0, 0.08);
+        }
+
+        .gate-divider-text {
+          font-size: 0.75rem;
+          color: #9ca3af;
+          font-weight: 500;
+        }
+
+        /* 演示模式按钮 - outline 风格 */
+        .gate-demo-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.75rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: #6b7280;
+          background: transparent;
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          border-radius: 0.625rem;
+          cursor: pointer;
+          transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+          font-family: inherit;
+        }
+
+        .gate-demo-button:hover:not(:disabled) {
+          color: #3b82f6;
+          border-color: rgba(59, 130, 246, 0.3);
+          background: rgba(59, 130, 246, 0.04);
+          transform: translateY(-1px);
+        }
+
+        .gate-demo-button:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        .gate-demo-button:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        .gate-spinner-dark {
+          border-color: rgba(107, 114, 128, 0.2);
+          border-top-color: #6b7280;
         }
 
         .gate-footer {
